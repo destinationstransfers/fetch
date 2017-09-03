@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 /**
  * headers.js
@@ -6,27 +6,28 @@
  * Headers class offers convenient helpers
  */
 
-const common = require('./common.js')
-const checkInvalidHeaderChar = common.checkInvalidHeaderChar
-const checkIsHttpToken = common.checkIsHttpToken
+const common = require('./common.js');
 
-function sanitizeName (name) {
-  name += ''
+const checkInvalidHeaderChar = common.checkInvalidHeaderChar;
+const checkIsHttpToken = common.checkIsHttpToken;
+
+function sanitizeName(name) {
+  name += '';
   if (!checkIsHttpToken(name)) {
-    throw new TypeError(`${name} is not a legal HTTP header name`)
+    throw new TypeError(`${name} is not a legal HTTP header name`);
   }
-  return name.toLowerCase()
+  return name.toLowerCase();
 }
 
-function sanitizeValue (value) {
-  value += ''
+function sanitizeValue(value) {
+  value += '';
   if (checkInvalidHeaderChar(value)) {
-    throw new TypeError(`${value} is not a legal HTTP header value`)
+    throw new TypeError(`${value} is not a legal HTTP header value`);
   }
-  return value
+  return value;
 }
 
-const MAP = Symbol('map')
+const MAP = Symbol('map');
 class Headers {
   /**
    * Headers class
@@ -34,20 +35,20 @@ class Headers {
    * @param   Object  headers  Response headers
    * @return  Void
    */
-  constructor (init) {
-    this[MAP] = Object.create(null)
+  constructor(init) {
+    this[MAP] = Object.create(null);
 
     if (init instanceof Headers) {
-      const rawHeaders = init.raw()
-      const headerNames = Object.keys(rawHeaders)
+      const rawHeaders = init.raw();
+      const headerNames = Object.keys(rawHeaders);
 
       for (const headerName of headerNames) {
         for (const value of rawHeaders[headerName]) {
-          this.append(headerName, value)
+          this.append(headerName, value);
         }
       }
 
-      return
+      return;
     }
 
     // We don't worry about converting prop to ByteString here as append()
@@ -55,45 +56,48 @@ class Headers {
     if (init == null) {
       // no op
     } else if (typeof init === 'object') {
-      const method = init[Symbol.iterator]
+      const method = init[Symbol.iterator];
       if (method != null) {
         if (typeof method !== 'function') {
-          throw new TypeError('Header pairs must be iterable')
+          throw new TypeError('Header pairs must be iterable');
         }
 
         // sequence<sequence<ByteString>>
         // Note: per spec we have to first exhaust the lists then process them
-        const pairs = []
+        const pairs = [];
         for (const pair of init) {
-          if (typeof pair !== 'object' || typeof pair[Symbol.iterator] !== 'function') {
-            throw new TypeError('Each header pair must be iterable')
+          if (
+            typeof pair !== 'object' ||
+            typeof pair[Symbol.iterator] !== 'function'
+          ) {
+            throw new TypeError('Each header pair must be iterable');
           }
-          pairs.push(Array.from(pair))
+          pairs.push(Array.from(pair));
         }
 
         for (const pair of pairs) {
           if (pair.length !== 2) {
-            throw new TypeError('Each header pair must be a name/value tuple')
+            throw new TypeError('Each header pair must be a name/value tuple');
           }
-          this.append(pair[0], pair[1])
+          this.append(pair[0], pair[1]);
         }
       } else {
         // record<ByteString, ByteString>
         for (const key of Object.keys(init)) {
-          const value = init[key]
-          this.append(key, value)
+          const value = init[key];
+          this.append(key, value);
         }
       }
     } else {
-      throw new TypeError('Provided initializer must be an object')
+      throw new TypeError('Provided initializer must be an object');
     }
 
     Object.defineProperty(this, Symbol.toStringTag, {
       value: 'Headers',
       writable: false,
       enumerable: false,
-      configurable: true
-    })
+      configurable: true,
+    });
   }
 
   /**
@@ -102,13 +106,13 @@ class Headers {
    * @param   String  name  Header name
    * @return  Mixed
    */
-  get (name) {
-    const list = this[MAP][sanitizeName(name)]
+  get(name) {
+    const list = this[MAP][sanitizeName(name)];
     if (!list) {
-      return null
+      return null;
     }
 
-    return list.join(', ')
+    return list.join(', ');
   }
 
   /**
@@ -118,15 +122,15 @@ class Headers {
    * @param   Boolean   thisArg   `this` context for callback function
    * @return  Void
    */
-  forEach (callback, thisArg) {
-    let pairs = getHeaderPairs(this)
-    let i = 0
+  forEach(callback, thisArg) {
+    let pairs = getHeaderPairs(this);
+    let i = 0;
     while (i < pairs.length) {
-      const name = pairs[i][0]
-      const value = pairs[i][1]
-      callback.call(thisArg, value, name, this)
-      pairs = getHeaderPairs(this)
-      i++
+      const name = pairs[i][0];
+      const value = pairs[i][1];
+      callback.call(thisArg, value, name, this);
+      pairs = getHeaderPairs(this);
+      i++;
     }
   }
 
@@ -137,8 +141,8 @@ class Headers {
    * @param   String  value  Header value
    * @return  Void
    */
-  set (name, value) {
-    this[MAP][sanitizeName(name)] = [sanitizeValue(value)]
+  set(name, value) {
+    this[MAP][sanitizeName(name)] = [sanitizeValue(value)];
   }
 
   /**
@@ -148,13 +152,13 @@ class Headers {
    * @param   String  value  Header value
    * @return  Void
    */
-  append (name, value) {
+  append(name, value) {
     if (!this.has(name)) {
-      this.set(name, value)
-      return
+      this.set(name, value);
+      return;
     }
 
-    this[MAP][sanitizeName(name)].push(sanitizeValue(value))
+    this[MAP][sanitizeName(name)].push(sanitizeValue(value));
   }
 
   /**
@@ -163,8 +167,8 @@ class Headers {
    * @param   String   name  Header name
    * @return  Boolean
    */
-  has (name) {
-    return !!this[MAP][sanitizeName(name)]
+  has(name) {
+    return !!this[MAP][sanitizeName(name)];
   }
 
   /**
@@ -173,17 +177,17 @@ class Headers {
    * @param   String  name  Header name
    * @return  Void
    */
-  delete (name) {
-    delete this[MAP][sanitizeName(name)]
-  };
+  delete(name) {
+    delete this[MAP][sanitizeName(name)];
+  }
 
   /**
    * Return raw headers (non-spec api)
    *
    * @return  Object
    */
-  raw () {
-    return this[MAP]
+  raw() {
+    return this[MAP];
   }
 
   /**
@@ -191,8 +195,8 @@ class Headers {
    *
    * @return  Iterator
    */
-  keys () {
-    return createHeadersIterator(this, 'key')
+  keys() {
+    return createHeadersIterator(this, 'key');
   }
 
   /**
@@ -200,8 +204,8 @@ class Headers {
    *
    * @return  Iterator
    */
-  values () {
-    return createHeadersIterator(this, 'value')
+  values() {
+    return createHeadersIterator(this, 'value');
   }
 
   /**
@@ -211,86 +215,82 @@ class Headers {
    *
    * @return  Iterator
    */
-  [Symbol.iterator] () {
-    return createHeadersIterator(this, 'key+value')
+  [Symbol.iterator]() {
+    return createHeadersIterator(this, 'key+value');
   }
 }
-Headers.prototype.entries = Headers.prototype[Symbol.iterator]
+Headers.prototype.entries = Headers.prototype[Symbol.iterator];
 
 Object.defineProperty(Headers.prototype, Symbol.toStringTag, {
   value: 'HeadersPrototype',
   writable: false,
   enumerable: false,
-  configurable: true
-})
+  configurable: true,
+});
 
-function getHeaderPairs (headers, kind) {
-  const keys = Object.keys(headers[MAP]).sort()
-  return keys.map(
-    kind === 'key'
-      ? k => [k]
-      : k => [k, headers.get(k)]
-  )
+function getHeaderPairs(headers, kind) {
+  const keys = Object.keys(headers[MAP]).sort();
+  return keys.map(kind === 'key' ? k => [k] : k => [k, headers.get(k)]);
 }
 
-const INTERNAL = Symbol('internal')
+const INTERNAL = Symbol('internal');
 
-function createHeadersIterator (target, kind) {
-  const iterator = Object.create(HeadersIteratorPrototype)
+function createHeadersIterator(target, kind) {
+  const iterator = Object.create(HeadersIteratorPrototype);
   iterator[INTERNAL] = {
     target,
     kind,
-    index: 0
-  }
-  return iterator
+    index: 0,
+  };
+  return iterator;
 }
 
-const HeadersIteratorPrototype = Object.setPrototypeOf({
-  next () {
-    // istanbul ignore if
-    if (!this ||
-      Object.getPrototypeOf(this) !== HeadersIteratorPrototype) {
-      throw new TypeError('Value of `this` is not a HeadersIterator')
-    }
-
-    const target = this[INTERNAL].target
-    const kind = this[INTERNAL].kind
-    const index = this[INTERNAL].index
-    const values = getHeaderPairs(target, kind)
-    const len = values.length
-    if (index >= len) {
-      return {
-        value: undefined,
-        done: true
+const HeadersIteratorPrototype = Object.setPrototypeOf(
+  {
+    next() {
+      // istanbul ignore if
+      if (!this || Object.getPrototypeOf(this) !== HeadersIteratorPrototype) {
+        throw new TypeError('Value of `this` is not a HeadersIterator');
       }
-    }
 
-    const pair = values[index]
-    this[INTERNAL].index = index + 1
+      const target = this[INTERNAL].target;
+      const kind = this[INTERNAL].kind;
+      const index = this[INTERNAL].index;
+      const values = getHeaderPairs(target, kind);
+      const len = values.length;
+      if (index >= len) {
+        return {
+          value: undefined,
+          done: true,
+        };
+      }
 
-    let result
-    if (kind === 'key') {
-      result = pair[0]
-    } else if (kind === 'value') {
-      result = pair[1]
-    } else {
-      result = pair
-    }
+      const pair = values[index];
+      this[INTERNAL].index = index + 1;
 
-    return {
-      value: result,
-      done: false
-    }
-  }
-}, Object.getPrototypeOf(
-  Object.getPrototypeOf([][Symbol.iterator]())
-))
+      let result;
+      if (kind === 'key') {
+        result = pair[0];
+      } else if (kind === 'value') {
+        result = pair[1];
+      } else {
+        result = pair;
+      }
+
+      return {
+        value: result,
+        done: false,
+      };
+    },
+  },
+  Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]())),
+);
 
 Object.defineProperty(HeadersIteratorPrototype, Symbol.toStringTag, {
   value: 'HeadersIterator',
   writable: false,
   enumerable: false,
-  configurable: true
-})
+  configurable: true,
+});
 
-module.exports = Headers
+module.exports = Headers;

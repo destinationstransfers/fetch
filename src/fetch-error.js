@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 /**
  * fetch-error.js
@@ -14,22 +14,21 @@
  * @param   String      systemError  For Node.js system error
  * @return  FetchError
  */
-module.exports = FetchError
-function FetchError (message, type, systemError) {
-  Error.call(this, message)
+module.exports = class FetchError extends Error {
+  constructor(message, type, systemError) {
+    // Calling parent constructor of base Error class.
+    super(message);
 
-  this.message = message
-  this.type = type
+    // Saving class name in the property of our custom error as a shortcut.
+    this.name = 'FetchError';
+    this.type = type;
 
-  // when err.type is `system`, err.code contains system error code
-  if (systemError) {
-    this.code = this.errno = systemError.code
+    // Capturing stack trace, excluding constructor call from it.
+    Error.captureStackTrace(this, this.constructor);
+
+    // when err.type is `system`, err.code contains system error code
+    if (systemError) {
+      this.code = this.errno = systemError.code;
+    }
   }
-
-  // hide custom error implementation details from end-users
-  Error.captureStackTrace(this, this.constructor)
-}
-
-FetchError.prototype = Object.create(Error.prototype)
-FetchError.prototype.constructor = FetchError
-FetchError.prototype.name = 'FetchError'
+};
