@@ -33,3 +33,6 @@ node_modules
 
 # Babel-compiled files
 lib
+
+package-lock.json
+
