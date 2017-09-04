@@ -1,67 +1,43 @@
-
-node-fetch-npm
-==============
+# @destinationstransfers/fetch
 
 [![npm version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![coverage status][codecov-image]][codecov-url]
 
-A light-weight module that brings `window.fetch` to Node.js
-
-`node-fetch-npm` is a fork of [`node-fetch`](https://npm.im/node-fetch) used in
-npm itself, through [`make-fetch-happen`](https://npm.im/make-fetch-happen). It
-has more regular releases and accepts some patches that would not fit with
-`node-fetch`'s own design goals (such as picking a specific cookie library,
-removing `babel` dependency altogether, etc).
-
-This library is *not a replacement* for `node-fetch`, nor does it intend to
-supplant it. It's purely a fork maintained for the sake of easier patching of
-specific needs that it wouldn't be fair to shove down the main project's throat.
-This project will still send patches for shared bugs over and hopefully help
-improve its "parent".
+It's a fork of `node-fetch-npm` that is a fork of [`node-fetch`](https://npm.im/node-fetch) used in
+npm itself, through [`make-fetch-happen`](https://npm.im/make-fetch-happen). Our goal is to go even more ahead of NPM and drop support for older versions of Node to enjoy latest language features and performance.
 
 ## Motivation
 
-Instead of implementing `XMLHttpRequest` in Node.js to run browser-specific [Fetch polyfill](https://github.com/github/fetch), why not go from native `http` to `fetch` API directly? Hence `node-fetch`, minimal code for a `window.fetch` compatible API on Node.js runtime.
-
-See Matt Andrews' [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) for isomorphic usage (exports `node-fetch` for server-side, `whatwg-fetch` for client-side).
-
+While we will be trying to keep API as much compatible with `whatwg-fetch` as possible the main goal is performance and server-side features.
 
 ## Features
 
-- Stay consistent with `window.fetch` API.
-- Make conscious trade-off when following [whatwg fetch spec][whatwg-fetch] and [stream spec](https://streams.spec.whatwg.org/) implementation details, document known difference.
-- Use native promise, but allow substituting it with [insert your favorite promise library].
-- Use native stream for body, on both request and response.
-- Decode content encoding (gzip/deflate) properly, and convert string output (such as `res.text()` and `res.json()`) to UTF-8 automatically.
-- Useful extensions such as timeout, redirect limit, response size limit, [explicit errors][] for troubleshooting.
+-   Stay consistent with `window.fetch` API
+-   Make conscious trade-off when following [whatwg fetch spec][whatwg-fetch] and [stream spec](https://streams.spec.whatwg.org/) implementation details, document known difference.
+-   Use native promise
+-   Use native stream for body, on both request and response.
+-   Decode content encoding (gzip/deflate) properly, and convert string output (such as `res.text()` and `res.json()`) to UTF-8 automatically.
+-   Useful extensions such as timeout, redirect limit, response size limit, [explicit errors][] for troubleshooting.
 
+## Difference from node-fetch
 
-## Difference from client-side fetch
-
-- See [Known Differences](https://github.com/npm/node-fetch-npm/blob/master/LIMITS.md) for details.
-- If you happen to use a missing feature that `window.fetch` offers, feel free to open an issue.
-- Pull requests are welcomed too!
-
+-   Implementing HTTP2 support from native Node 8.4 support
+-   Implements Brotli compression support
+-   Moved tests to Jest and decreased library size
+-   Dropped Blob support that makes no sense server-side
+-   Dropped `textConverted` non-spec API support
 
 ## Install
 
 ```sh
-$ npm install node-fetch-npm --save
+$ npm install @destinationstransfers/fetch --save
 ```
-
 
 ## Usage
 
 ```javascript
-import fetch from 'node-fetch';
-// or
-// const fetch = require('node-fetch');
-
-// if you are using your own Promise library, set it through fetch.Promise. Eg.
-
-// import Bluebird from 'bluebird';
-// fetch.Promise = Bluebird;
+const fetch = require('@destinationstransfers/fetch');
 
 // plain text or html
 
@@ -171,20 +147,20 @@ fetch('http://httpbin.org/post', { method: 'POST', body: form, headers: form.get
 
 See [test cases](https://github.com/npm/node-fetch-npm/blob/master/test/test.js) for more examples.
 
-
 ## API
 
 ### fetch(url[, options])
 
-- `url` A string representing the URL for fetching
-- `options` [Options](#fetch-options) for the HTTP(S) request
-- Returns: <code>Promise&lt;[Response](#class-response)&gt;</code>
+-   `url` A string representing the URL for fetching
+-   `options` [Options](#fetch-options) for the HTTP(S) request
+-   Returns: <code>Promise&lt;[Response](#class-response)></code>
 
 Perform an HTTP(S) fetch.
 
 `url` should be an absolute url, such as `http://example.com/`. A path-relative URL (`/file/under/root`) or protocol-relative URL (`//can-be-http-or-https.com/`) will result in a rejected promise.
 
 <a id="fetch-options"></a>
+
 #### Options
 
 The default values are shown after each option key.
@@ -210,85 +186,88 @@ The default values are shown after each option key.
 
 If no values are set, the following request headers will be sent automatically:
 
-Header            | Value
------------------ | --------------------------------------------------------
-`Accept-Encoding` | `gzip,deflate` _(when `options.compress === true`)_
-`Accept`          | `*/*`
-`Connection`      | `close` _(when no `options.agent` is present)_
-`Content-Length`  | _(automatically calculated, if possible)_
-`User-Agent`      | `node-fetch-npm/1.0 (+https://github.com/npm/node-fetch-npm)`
+| Header            | Value                                                         |
+| ----------------- | ------------------------------------------------------------- |
+| `Accept-Encoding` | `gzip,deflate` _(when `options.compress === true`)_           |
+| `Accept`          | `*/*`                                                         |
+| `Connection`      | `close` _(when no `options.agent` is present)_                |
+| `Content-Length`  | _(automatically calculated, if possible)_                     |
+| `User-Agent`      | `node-fetch-npm/1.0 (+https://github.com/npm/node-fetch-npm)` |
 
 <a id="class-request"></a>
+
 ### Class: Request
 
 An HTTP(S) request containing information about URL, method, headers, and the body. This class implements the [Body](#iface-body) interface.
 
 Due to the nature of Node.js, the following properties are not implemented at this moment:
 
-- `type`
-- `destination`
-- `referrer`
-- `referrerPolicy`
-- `mode`
-- `credentials`
-- `cache`
-- `integrity`
-- `keepalive`
+-   `type`
+-   `destination`
+-   `referrer`
+-   `referrerPolicy`
+-   `mode`
+-   `credentials`
+-   `cache`
+-   `integrity`
+-   `keepalive`
 
 The following node-fetch-npm extension properties are provided:
 
-- `follow`
-- `compress`
-- `counter`
-- `agent`
+-   `follow`
+-   `compress`
+-   `counter`
+-   `agent`
 
 See [options](#fetch-options) for exact meaning of these extensions.
 
 #### new Request(input[, options])
 
-<small>*(spec-compliant)*</small>
+<small>_(spec-compliant)_</small>
 
-- `input` A string representing a URL, or another `Request` (which will be cloned)
-- `options` [Options][#fetch-options] for the HTTP(S) request
+-   `input` A string representing a URL, or another `Request` (which will be cloned)
+-   `options` [Options][#fetch-options] for the HTTP(S) request
 
 Constructs a new `Request` object. The constructor is identical to that in the [browser](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request).
 
 In most cases, directly `fetch(url, options)` is simpler than creating a `Request` object.
 
 <a id="class-response"></a>
+
 ### Class: Response
 
 An HTTP(S) response. This class implements the [Body](#iface-body) interface.
 
 The following properties are not implemented in node-fetch-npm at this moment:
 
-- `Response.error()`
-- `Response.redirect()`
-- `type`
-- `redirected`
-- `trailer`
+-   `Response.error()`
+-   `Response.redirect()`
+-   `type`
+-   `redirected`
+-   `trailer`
 
-#### new Response([body[, options]])
+#### new Response(\[body[, options]])
 
-<small>*(spec-compliant)*</small>
+<small>_(spec-compliant)_</small>
 
-- `body` A string or [Readable stream][node-readable]
-- `options` A [`ResponseInit`][response-init] options dictionary
+-   `body` A string or [Readable stream][node-readable]
+-   `options` A [`ResponseInit`][response-init] options dictionary
 
 Constructs a new `Response` object. The constructor is identical to that in the [browser](https://developer.mozilla.org/en-US/docs/Web/API/Response/Response).
 
 Because Node.js does not implement service workers (for which this class was designed), one rarely has to construct a `Response` directly.
 
 <a id="class-headers"></a>
+
 ### Class: Headers
 
 This class allows manipulating and iterating over a set of HTTP headers. All methods specified in the [Fetch Standard][whatwg-fetch] are implemented.
 
 #### new Headers([init])
 
-<small>*(spec-compliant)*</small>
+<small>_(spec-compliant)_</small>
 
-- `init` Optional argument to pre-fill the `Headers` object
+-   `init` Optional argument to pre-fill the `Headers` object
 
 Construct a new `Headers` object. `init` can be either `null`, a `Headers` object, an key-value map object, or any iterable object.
 
@@ -317,61 +296,66 @@ const copyOfHeaders = new Headers(headers);
 ```
 
 <a id="iface-body"></a>
+
 ### Interface: Body
 
 `Body` is an abstract interface with methods that are applicable to both `Request` and `Response` classes.
 
 The following methods are not yet implemented in node-fetch-npm at this moment:
 
-- `formData()`
+-   `formData()`
 
 #### body.body
 
-<small>*(deviation from spec)*</small>
+<small>_(deviation from spec)_</small>
 
-* Node.js [`Readable` stream][node-readable]
+-   Node.js [`Readable` stream][node-readable]
 
 The data encapsulated in the `Body` object. Note that while the [Fetch Standard][whatwg-fetch] requires the property to always be a WHATWG `ReadableStream`, in node-fetch-npm it is a Node.js [`Readable` stream][node-readable].
 
 #### body.bodyUsed
 
-<small>*(spec-compliant)*</small>
+<small>_(spec-compliant)_</small>
 
-* `Boolean`
+-   `Boolean`
 
 A boolean property for if this body has been consumed. Per spec, a consumed body cannot be used again.
 
 #### body.arrayBuffer()
+
 #### body.blob()
+
 #### body.json()
+
 #### body.text()
 
-<small>*(spec-compliant)*</small>
+<small>_(spec-compliant)_</small>
 
-* Returns: <code>Promise</code>
+-   Returns: <code>Promise</code>
 
 Consume the body and return a promise that will resolve to one of these formats.
 
 #### body.buffer()
 
-<small>*(node-fetch-npm extension)*</small>
+<small>_(node-fetch-npm extension)_</small>
 
-* Returns: <code>Promise&lt;Buffer&gt;</code>
+-   Returns: <code>Promise&lt;Buffer></code>
 
 Consume the body and return a promise that will resolve to a Buffer.
 
 #### body.textConverted()
 
-<small>*(node-fetch-npm extension)*</small>
+<small>_(node-fetch-npm extension)_</small>
 
-* Returns: <code>Promise&lt;String&gt;</code>
+-   Returns: <code>Promise&lt;String></code>
 
 Identical to `body.text()`, except instead of always converting to UTF-8, encoding sniffing will be performed and text converted to UTF-8, if possible.
 
 <a id="class-fetcherror"></a>
+
 ### Class: FetchError
 
-<small>*(node-fetch-npm extension)*</small>
+<small>_(node-fetch-npm extension)_</small>
 
 An operational error in the fetching process. See [ERROR-HANDLING.md][] for more info.
 
@@ -379,20 +363,28 @@ An operational error in the fetching process. See [ERROR-HANDLING.md][] for more
 
 MIT
 
-
 ## Acknowledgement
 
 Thanks to [github/fetch](https://github.com/github/fetch) for providing a solid implementation reference.
 
-
 [npm-image]: https://img.shields.io/npm/v/node-fetch-npm.svg?style=flat-square
+
 [npm-url]: https://www.npmjs.com/package/node-fetch-npm
+
 [travis-image]: https://img.shields.io/travis/npm/node-fetch-npm.svg?style=flat-square
+
 [travis-url]: https://travis-ci.org/npm/node-fetch-npm
+
 [codecov-image]: https://img.shields.io/codecov/c/github/npm/node-fetch-npm.svg?style=flat-square
+
 [codecov-url]: https://codecov.io/gh/npm/node-fetch-npm
-[ERROR-HANDLING.md]: https://github.com/npm/node-fetch-npm/blob/master/ERROR-HANDLING.md
+
+[error-handling.md]: https://github.com/npm/node-fetch-npm/blob/master/ERROR-HANDLING.md
+
 [whatwg-fetch]: https://fetch.spec.whatwg.org/
+
 [response-init]: https://fetch.spec.whatwg.org/#responseinit
+
 [node-readable]: https://nodejs.org/api/stream.html#stream_readable_streams
+
 [mdn-headers]: https://developer.mozilla.org/en-US/docs/Web/API/Headers
