@@ -52,6 +52,11 @@ function Body(body, opts = {}) {
 }
 
 Body.prototype = {
+  /**
+   * Returns whether body was already used
+   * 
+   * @returns {boolean}
+   */
   get bodyUsed() {
     return this[DISTURBED];
   },
@@ -59,65 +64,67 @@ Body.prototype = {
   /**
    * Decode response as ArrayBuffer
    *
-   * @returns {Promise}
+   * @returns {Promise.<ArrayBuffer>}
    */
-  arrayBuffer() {
-    return consumeBody
-      .call(this)
-      .then(buf =>
-        buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength),
-      );
+  async arrayBuffer() {
+    const buf = await consumeBody.call(this);
+    return ArrayBuffer.prototype.slice.call(
+      buf.buffer,
+      buf.byteOffset,
+      buf.byteOffset + buf.byteLength,
+    );
   },
 
   /**
    * Return raw response as Blob
    *
-   * @returns {Promise}
+   * @returns {Promise.<Blob>}
    */
-  blob() {
+  async blob() {
     const ct = (this.headers && this.headers.get('content-type')) || '';
-    return consumeBody.call(this).then(buf =>
-      Object.assign(
-        // Prevent copying
-        new Blob([], {
-          type: ct.toLowerCase(),
-        }),
-        {
-          [BUFFER]: buf,
-        },
-      ),
+    const buf = await consumeBody.call(this);
+    return Object.assign(
+      // Prevent copying
+      new Blob([], {
+        type: ct.toLowerCase(),
+      }),
+      {
+        [BUFFER]: buf,
+      },
     );
   },
 
   /**
    * Decode response as json
    *
-   * @return  Promise
+   * @returns  {Promise.<Object>}
    */
-  json() {
-    return consumeBody.call(this).then(buffer => parseJson(buffer.toString()));
+  async json() {
+    const buffer = await consumeBody.call(this);
+    return parseJson(buffer.toString());
   },
 
   /**
    * Decode response as text
    *
-   * @return  Promise
+   * @returns  {Promise.<string>}
    */
-  text() {
-    return consumeBody.call(this).then(buffer => buffer.toString());
+  async text() {
+    const buffer = await consumeBody.call(this);
+    return buffer.toString();
   },
 
   /**
    * Decode response as buffer (non-spec api)
    *
-   * @return  Promise
+   * @returns  {Promise.<Buffer>}
    */
   buffer() {
     return consumeBody.call(this);
   },
 };
 
-Body.mixIn = function(proto) {
+Body.mixIn = proto => {
   for (const name of Object.getOwnPropertyNames(Body.prototype)) {
     // istanbul ignore else: future proof
     if (!(name in proto)) {
@@ -132,7 +139,7 @@ exports = module.exports = Body;
 /**
  * Decode buffers into utf-8 string
  *
- * @returns  Promise
+ * @returns  {Promise.<Buffer>}
  */
 async function consumeBody(body) {
   if (this[DISTURBED]) {
@@ -235,13 +242,11 @@ async function consumeBody(body) {
 /**
  * Clone body given Res/Req instance
  *
- * @param   Mixed  instance  Response or Request instance
- * @returns  Mixed
+ * @param { Response | Request} instance - Response or Request instance
+ * @returns {Body}
  */
 exports.clone = function clone(instance) {
-  let p1;
-  let p2;
-  let body = instance.body;
+  let { body } = instance;
 
   // don't allow cloning a used body
   if (instance.bodyUsed) {
@@ -252,8 +257,8 @@ exports.clone = function clone(instance) {
   // note: we can't clone the form-data object without having it as a dependency
   if (body instanceof Stream && typeof body.getBoundary !== 'function') {
     // tee instance body
-    p1 = new PassThrough();
-    p2 = new PassThrough();
+    const p1 = new PassThrough();
+    const p2 = new PassThrough();
     body.pipe(p1);
     body.pipe(p2);
     // set instance body to teed body and return the other teed body

@@ -8,7 +8,7 @@ const TYPE = Symbol('type');
 const CLOSED = Symbol('closed');
 
 class Blob {
-  constructor() {
+  constructor(blobParts, options) {
     Object.defineProperty(this, Symbol.toStringTag, {
       value: 'Blob',
       writable: false,
@@ -18,9 +18,6 @@ class Blob {
 
     this[CLOSED] = false;
     this[TYPE] = '';
-
-    const blobParts = arguments[0];
-    const options = arguments[1];
 
     const buffers = [];
 
@@ -63,20 +60,51 @@ class Blob {
       this[TYPE] = type;
     }
   }
+
+  /**
+   * 
+   * @returns {number}
+   * @readonly
+   * @memberof Blob
+   */
   get size() {
     return this[CLOSED] ? 0 : this[BUFFER].length;
   }
+
+  /**
+   * 
+   * @returns {string}
+   * @readonly
+   * @memberof Blob
+   */
   get type() {
     return this[TYPE];
   }
+
+  /**
+   * 
+   * 
+   * @readonly
+   * @returns {boolean}
+   * @memberof Blob
+   */
   get isClosed() {
     return this[CLOSED];
   }
-  slice() {
-    const size = this.size;
 
-    const start = arguments[0];
-    const end = arguments[1];
+  /**
+   * The Blob.slice() method is used to create a new Blob object
+   * containing the data in the specified range of bytes of the source Blob.
+   * 
+   * @param {number} [start=0]
+   * @param {number} [end=size] 
+   * @param {string} [contentType='']
+   * @returns {Blob}
+   * @memberof Blob
+   */
+  slice(start, end, contentType) {
+    const { size } = this;
+
     let relativeStart;
     let relativeEnd;
     if (start === undefined) {
@@ -97,7 +125,7 @@ class Blob {
 
     const buffer = this[BUFFER];
     const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
-    const blob = new Blob([], { type: arguments[2] });
+    const blob = new Blob([], { type: contentType });
     blob[BUFFER] = slicedBuffer;
     blob[CLOSED] = this[CLOSED];
     return blob;
@@ -106,8 +134,9 @@ class Blob {
     this[CLOSED] = true;
   }
 }
-exports = module.exports = Blob;
-exports.BUFFER = BUFFER;
+
+module.exports = Blob;
+module.exports.BUFFER = BUFFER;
 
 Object.defineProperty(Blob.prototype, Symbol.toStringTag, {
   value: 'BlobPrototype',

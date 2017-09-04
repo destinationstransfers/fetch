@@ -6,25 +6,22 @@
  * Headers class offers convenient helpers
  */
 
-const common = require('./common.js');
-
-const checkInvalidHeaderChar = common.checkInvalidHeaderChar;
-const checkIsHttpToken = common.checkIsHttpToken;
+const { checkInvalidHeaderChar, checkIsHttpToken } = require('./common.js');
 
 function sanitizeName(name) {
-  name += '';
-  if (!checkIsHttpToken(name)) {
-    throw new TypeError(`${name} is not a legal HTTP header name`);
+  const n = String(name);
+  if (!checkIsHttpToken(n)) {
+    throw new TypeError(`${n} is not a legal HTTP header name`);
   }
-  return name.toLowerCase();
+  return n.toLowerCase();
 }
 
 function sanitizeValue(value) {
-  value += '';
-  if (checkInvalidHeaderChar(value)) {
-    throw new TypeError(`${value} is not a legal HTTP header value`);
+  const v = String(value);
+  if (checkInvalidHeaderChar(v)) {
+    throw new TypeError(`${v} is not a legal HTTP header value`);
   }
-  return value;
+  return v;
 }
 
 const MAP = Symbol('map');
@@ -32,8 +29,7 @@ class Headers {
   /**
    * Headers class
    *
-   * @param   Object  headers  Response headers
-   * @return  Void
+   * @param {Object}  init - headers  Response headers
    */
   constructor(init) {
     this[MAP] = Object.create(null);
@@ -103,8 +99,8 @@ class Headers {
   /**
    * Return first header value given name
    *
-   * @param   String  name  Header name
-   * @return  Mixed
+   * @param   {string}  name - Header name
+   * @returns {string | null}
    */
   get(name) {
     const list = this[MAP][sanitizeName(name)];
@@ -118,9 +114,8 @@ class Headers {
   /**
    * Iterate over all headers
    *
-   * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
-   * @param   Boolean   thisArg   `this` context for callback function
-   * @return  Void
+   * @param   {Function}  callback -  Executed for each item with parameters (value, name, thisArg)
+   * @param   {boolean}   thisArg  - `this` context for callback function
    */
   forEach(callback, thisArg) {
     let pairs = getHeaderPairs(this);
@@ -137,9 +132,8 @@ class Headers {
   /**
    * Overwrite header values given name
    *
-   * @param   String  name   Header name
-   * @param   String  value  Header value
-   * @return  Void
+   * @param   {string}  name -  Header name
+   * @param   {string}  value - Header value
    */
   set(name, value) {
     this[MAP][sanitizeName(name)] = [sanitizeValue(value)];
@@ -148,9 +142,8 @@ class Headers {
   /**
    * Append a value onto existing header
    *
-   * @param   String  name   Header name
-   * @param   String  value  Header value
-   * @return  Void
+   * @param  {string}  name -  Header name
+   * @param  {string}  value -  Header value
    */
   append(name, value) {
     if (!this.has(name)) {
@@ -164,8 +157,8 @@ class Headers {
   /**
    * Check for header name existence
    *
-   * @param   String   name  Header name
-   * @return  Boolean
+   * @param   {string}   name -  Header name
+   * @returns  {boolean}
    */
   has(name) {
     return !!this[MAP][sanitizeName(name)];

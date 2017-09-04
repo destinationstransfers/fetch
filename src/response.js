@@ -6,7 +6,7 @@
  * Response class provides content decoding
  */
 
-const STATUS_CODES = require('http').STATUS_CODES;
+const { STATUS_CODES } = require('http');
 const Headers = require('./headers.js');
 const Body = require('./body.js');
 
