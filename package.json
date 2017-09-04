@@ -12,11 +12,7 @@
   "scripts": {
     "prerelease": "npm t",
     "postrelease": "npm publish && git push --follow-tags",
-    "pretest": "standard src/*",
-    "release": "standard-version -s",
-    "test": "mocha test/test.js",
-    "report": "nyc --reporter lcov --reporter text mocha -R spec test/test.js",
-    "coverage": "nyc --reporter json --reporter text mocha -R spec test/test.js && codecov -f coverage/coverage-final.json",
+    "test": "node --expose-http2 ./node_modules/.bin/jest",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
     "lint:markdown": "remark . --frail",
@@ -42,29 +38,18 @@
   "homepage": "https://github.com/destinationstransfers/fetch",
   "devDependencies": {
     "@destinationstransfers/eslint-config": "^1.0.2",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
-    "chai-iterator": "^1.1.1",
-    "chai-string": "^1.4.0",
-    "codecov": "^1.0.1",
-    "cross-env": "^3.1.4",
     "eslint": "^4.6.0",
+    "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^5.1.1",
     "form-data": "^2.3.1",
-    "is-builtin-module": "^1.0.0",
-    "mocha": "^3.5.0",
-    "nyc": "^10.3.2",
+    "jest": "^20.0.4",
     "parted": "^0.1.1",
-    "promise": "^7.3.1",
     "remark-cli": "^4.0.0",
     "remark-preset-lint-consistent": "^2.0.1",
     "remark-preset-lint-recommended": "^3.0.1",
     "resumer": "0.0.0",
-    "standard": "^10.0.3",
-    "standard-version": "^4.2.0",
     "weallbehave": "^1.2.0",
-    "weallcontribute": "^1.0.8",
-    "whatwg-url": "^4.8.0"
+    "weallcontribute": "^1.0.8"
   },
   "dependencies": {
     "json-parse-better-errors": "^1.0.0"
@@ -79,8 +64,9 @@
     "collectCoverage": true,
     "testEnvironment": "node",
     "verbose": true,
-    "collectCoverageFrom": [
-      "src/**/*.js"
+    "bail": true,
+    "testMatch": [
+      "**/__tests__/*.js"
     ]
   },
   "eslintConfig": {
@@ -98,7 +84,7 @@
       "sourceType": "script"
     },
     "rules": {
-      "prefer-object-spread/prefer-object-spread": "error"
+      "prefer-object-spread/prefer-object-spread": "off"
     }
   }
 }
