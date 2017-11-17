@@ -34,6 +34,6 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
-      - run: npm test
+      - run: node node_modules/.bin/jest --coverage --bail --noStackTrace --maxWorkers=2 --forceExit
 
 
