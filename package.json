@@ -42,7 +42,7 @@
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^5.1.1",
     "form-data": "^2.3.1",
-    "jest": "^20.0.4",
+    "jest": "^21.2.1",
     "parted": "^0.1.1",
     "remark-cli": "^4.0.0",
     "remark-preset-lint-consistent": "^2.0.1",
